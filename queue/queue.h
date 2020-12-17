@@ -10,39 +10,28 @@ protected:
 	T* arr;
 	int start;
 	int finish;
+	int counter;
 
 public:
-	TQueue();
-	TQueue(int size);
+	TQueue(int size = 0);
 	TQueue(TQueue& q);
 	~TQueue();
 
-	void push(T s);
-	T pop(); //Вывод последнего элемента и его удаление
-	bool empty();
-
+	void Push(T s);
+	T Pop(); //Вывод последнего элемента и его удаление
+	bool IsEmpty();
+	bool IsFull();
 };
-
-template<class T>
-inline TQueue<T>::TQueue()
-{
-	arr = new T * [1];
-	start = 0;
-	finish = 0;
-	size = 1;
-	arr[0] = 0;
-}
 
 template<class T>
 inline TQueue<T>::TQueue(int size)
 {
 	if (size < 0) throw logic_error("size < 0");
-	arr = new T [size];
+	arr = new T[size];
 	this->size = size;
 	start = 0;
 	finish = 0;
-	for (int i = 0; i < size; i++)
-		arr[i] = 0;
+	counter = 0;
 }
 
 template<class T>
@@ -50,10 +39,16 @@ inline TQueue<T>::TQueue(TQueue& q)
 {
 	this->size = q.size;
 	this->arr = new T * [q.size];
-	for (int i = 0; i < q.size; i++)
-		this->arr[i] = q.arr[i];
+	this->counter = q.counter;
 	this->start = q.start;
 	this->finish = q.finish;
+
+	if (start > finish)
+		for (int i = start; i < finish; i++)
+			this->arr[i] = q.arr[i];
+	else
+		for (int i = finish; i < start; i++)
+			this->arr[i] = q.arr[i];
 }
 
 template<class T>
@@ -62,31 +57,38 @@ inline TQueue<T>::~TQueue()
 	if (arr != 0) delete[] arr;
 	start = 0;
 	finish = 0;
+	counter = 0;
 }
 
 template<class T>
-inline void TQueue<T>::push(T s)
+inline void TQueue<T>::Push(T s)
 {
-	if ((start == finish) && (arr[finish] != 0)) throw logic_error("Full queue");
+	if ((start == finish) && (IsFull())) throw logic_error("Full queue");
 	arr[finish] = s;
 	finish = (finish + 1) % size;
+	counter++;
 }
 
 template<class T>
-inline T TQueue<T>::pop()
+inline T TQueue<T>::Pop()
 {
-	if ((finish == start) && (arr[start] == 0)) throw logic_error("Queue is empty");
+	if (IsEmpty()) throw logic_error("Queue is empty");
 	T a = arr[start];
 	arr[start] = 0;
 	start = (start + 1) % size;
+	counter--;
 	return a;
 }
 
 template<class T>
-inline bool TQueue<T>::empty()
+inline bool TQueue<T>::IsEmpty()
 {
-	if (start == finish)
-		return true;
-	else
-		return false;
+	return (counter == 0);
 }
+
+template<class T>
+inline bool TQueue<T>::IsFull()
+{
+	return (counter >= size);
+}
+
